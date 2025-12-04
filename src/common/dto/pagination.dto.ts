@@ -30,12 +30,7 @@ export class PaginatedResponseDto<T> {
   @ApiProperty()
   hasPrev: boolean;
 
-  constructor(
-    data: T[],
-    page: number,
-    limit: number,
-    total: number,
-  ) {
+  constructor(data: T[], page: number, limit: number, total: number) {
     this.data = data;
     this.page = page;
     this.limit = limit;

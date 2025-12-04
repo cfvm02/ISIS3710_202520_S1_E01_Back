@@ -13,7 +13,10 @@ export class UpdateProfileDto {
   @MaxLength(500)
   bio?: string;
 
-  @ApiProperty({ required: false, enum: ['Street', 'Minimalist', 'Formal', 'Boho', 'Vintage', 'Casual'] })
+  @ApiProperty({
+    required: false,
+    enum: ['Street', 'Minimalist', 'Formal', 'Boho', 'Vintage', 'Casual'],
+  })
   @IsEnum(['Street', 'Minimalist', 'Formal', 'Boho', 'Vintage', 'Casual'])
   @IsOptional()
   style?: string;

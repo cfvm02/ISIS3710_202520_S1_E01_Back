@@ -26,7 +26,10 @@ export class RatingsController {
   @Put()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create or update rating for a post' })
-  @ApiResponse({ status: 200, description: 'Rating created/updated successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Rating created/updated successfully',
+  })
   upsertRating(
     @Param('postId') postId: string,
     @CurrentUser('userId') userId: string,

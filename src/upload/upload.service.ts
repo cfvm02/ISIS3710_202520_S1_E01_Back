@@ -12,11 +12,23 @@ export class UploadService {
   private readonly uploadPath: string;
   private readonly maxFileSize: number;
   private readonly allowedTypes: string[];
+  private readonly fileBaseUrl: string;
 
   constructor(private configService: ConfigService) {
-    this.uploadPath = this.configService.get<string>('UPLOAD_PATH') || './uploads';
-    this.maxFileSize = this.configService.get<number>('MAX_FILE_SIZE') || 5242880;
-    this.allowedTypes = (this.configService.get<string>('ALLOWED_IMAGE_TYPES') || 'image/jpeg,image/png,image/webp').split(',');
+    this.uploadPath =
+      this.configService.get<string>('UPLOAD_PATH') || './uploads';
+    this.maxFileSize =
+      this.configService.get<number>('MAX_FILE_SIZE') || 5242880;
+    const port = this.configService.get<number>('PORT') || 3000;
+    const configuredBaseUrl =
+      this.configService.get<string>('FILE_BASE_URL') ||
+      this.configService.get<string>('API_BASE_URL') ||
+      `http://localhost:${port}`;
+    this.fileBaseUrl = configuredBaseUrl.replace(/\/$/, '');
+    this.allowedTypes = (
+      this.configService.get<string>('ALLOWED_IMAGE_TYPES') ||
+      'image/jpeg,image/png,image/webp'
+    ).split(',');
 
     if (!fs.existsSync(this.uploadPath)) {
       fs.mkdirSync(this.uploadPath, { recursive: true });
@@ -37,23 +49,30 @@ export class UploadService {
     }
 
     if (!this.allowedTypes.includes(file.mimetype)) {
-      throw new BadRequestException(`Invalid file type. Allowed types: ${this.allowedTypes.join(', ')}`);
+      throw new BadRequestException(
+        `Invalid file type. Allowed types: ${this.allowedTypes.join(', ')}`,
+      );
     }
 
     if (file.size > this.maxFileSize) {
-      throw new BadRequestException(`File too large. Maximum size: ${this.maxFileSize / 1024 / 1024}MB`);
+      throw new BadRequestException(
+        `File too large. Maximum size: ${this.maxFileSize / 1024 / 1024}MB`,
+      );
     }
 
-    const typeDir = type === 'avatar' ? 'avatars' : type === 'cloth' ? 'cloths' : 'posts';
+    const typeDir =
+      type === 'avatar' ? 'avatars' : type === 'cloth' ? 'cloths' : 'posts';
     const fileName = `${Date.now()}-${file.originalname}`;
     const filePath = path.join(this.uploadPath, typeDir, fileName);
 
     fs.writeFileSync(filePath, file.buffer);
 
-    const url = `/uploads/${typeDir}/${fileName}`;
+    const relativeUrl = `/uploads/${typeDir}/${fileName}`;
+    const url = `${this.fileBaseUrl}${relativeUrl}`;
 
     return {
       url,
+      relativeUrl,
       filename: fileName,
       size: file.size,
     };

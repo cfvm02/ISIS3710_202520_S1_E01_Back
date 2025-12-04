@@ -7,19 +7,27 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Collection, CollectionDocument } from '../schemas/collection.schema';
-import { CollectionItem, CollectionItemDocument } from '../schemas/collection-item.schema';
+import {
+  CollectionItem,
+  CollectionItemDocument,
+} from '../schemas/collection-item.schema';
 import { Post, PostDocument } from '../schemas/post.schema';
 import { CreateCollectionDto, UpdateCollectionDto } from './dto/collection.dto';
 
 @Injectable()
 export class CollectionsService {
   constructor(
-    @InjectModel(Collection.name) private collectionModel: Model<CollectionDocument>,
-    @InjectModel(CollectionItem.name) private collectionItemModel: Model<CollectionItemDocument>,
+    @InjectModel(Collection.name)
+    private collectionModel: Model<CollectionDocument>,
+    @InjectModel(CollectionItem.name)
+    private collectionItemModel: Model<CollectionItemDocument>,
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
   ) {}
 
-  async create(userId: string, createCollectionDto: CreateCollectionDto): Promise<any> {
+  async create(
+    userId: string,
+    createCollectionDto: CreateCollectionDto,
+  ): Promise<any> {
     const collection = await this.collectionModel.create({
       ...createCollectionDto,
       userId: new Types.ObjectId(userId),
@@ -57,7 +65,10 @@ export class CollectionsService {
       throw new NotFoundException('Collection not found');
     }
 
-    if (!collection.isPublic && (!userId || collection.userId.toString() !== userId)) {
+    if (
+      !collection.isPublic &&
+      (!userId || collection.userId.toString() !== userId)
+    ) {
       throw new ForbiddenException('This collection is private');
     }
 
@@ -66,7 +77,10 @@ export class CollectionsService {
       .sort({ savedAt: -1 })
       .populate({
         path: 'postId',
-        populate: { path: 'userId', select: 'username avatar firstName lastName' },
+        populate: {
+          path: 'userId',
+          select: 'username avatar firstName lastName',
+        },
       })
       .lean();
 
@@ -79,7 +93,11 @@ export class CollectionsService {
     };
   }
 
-  async update(collectionId: string, userId: string, updateCollectionDto: UpdateCollectionDto): Promise<any> {
+  async update(
+    collectionId: string,
+    userId: string,
+    updateCollectionDto: UpdateCollectionDto,
+  ): Promise<any> {
     const collection = await this.collectionModel.findById(collectionId);
 
     if (!collection) {
@@ -91,13 +109,20 @@ export class CollectionsService {
     }
 
     const updatedCollection = await this.collectionModel
-      .findByIdAndUpdate(collectionId, { $set: updateCollectionDto }, { new: true })
+      .findByIdAndUpdate(
+        collectionId,
+        { $set: updateCollectionDto },
+        { new: true },
+      )
       .lean();
 
     return updatedCollection;
   }
 
-  async remove(collectionId: string, userId: string): Promise<{ deleted: boolean }> {
+  async remove(
+    collectionId: string,
+    userId: string,
+  ): Promise<{ deleted: boolean }> {
     const collection = await this.collectionModel.findById(collectionId);
 
     if (!collection) {
@@ -114,7 +139,11 @@ export class CollectionsService {
     return { deleted: true };
   }
 
-  async addPost(collectionId: string, userId: string, postId: string): Promise<any> {
+  async addPost(
+    collectionId: string,
+    userId: string,
+    postId: string,
+  ): Promise<any> {
     const collection = await this.collectionModel.findById(collectionId);
 
     if (!collection) {
@@ -122,7 +151,9 @@ export class CollectionsService {
     }
 
     if (collection.userId.toString() !== userId) {
-      throw new ForbiddenException('You can only add posts to your own collections');
+      throw new ForbiddenException(
+        'You can only add posts to your own collections',
+      );
     }
 
     const post = await this.postModel.findById(postId);
@@ -148,7 +179,9 @@ export class CollectionsService {
       $inc: { savedCount: 1 },
     });
 
-    const itemsCount = await this.collectionItemModel.countDocuments({ collectionId });
+    const itemsCount = await this.collectionItemModel.countDocuments({
+      collectionId,
+    });
 
     return {
       saved: true,
@@ -156,7 +189,11 @@ export class CollectionsService {
     };
   }
 
-  async removePost(collectionId: string, userId: string, postId: string): Promise<any> {
+  async removePost(
+    collectionId: string,
+    userId: string,
+    postId: string,
+  ): Promise<any> {
     const collection = await this.collectionModel.findById(collectionId);
 
     if (!collection) {
@@ -164,7 +201,9 @@ export class CollectionsService {
     }
 
     if (collection.userId.toString() !== userId) {
-      throw new ForbiddenException('You can only remove posts from your own collections');
+      throw new ForbiddenException(
+        'You can only remove posts from your own collections',
+      );
     }
 
     const item = await this.collectionItemModel.findOneAndDelete({
@@ -180,7 +219,9 @@ export class CollectionsService {
       $inc: { savedCount: -1 },
     });
 
-    const itemsCount = await this.collectionItemModel.countDocuments({ collectionId });
+    const itemsCount = await this.collectionItemModel.countDocuments({
+      collectionId,
+    });
 
     return {
       removed: true,

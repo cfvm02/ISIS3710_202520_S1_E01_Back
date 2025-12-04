@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsArray, IsOptional, IsEnum, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  IsOptional,
+  IsEnum,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class ClothItemDto {
@@ -49,12 +56,18 @@ export class CreatePostDto {
   @IsOptional()
   tags?: string[];
 
-  @ApiProperty({ enum: ['party', 'work', 'casual', 'travel', 'sport', 'night', 'formal'], required: false })
+  @ApiProperty({
+    enum: ['party', 'work', 'casual', 'travel', 'sport', 'night', 'formal'],
+    required: false,
+  })
   @IsEnum(['party', 'work', 'casual', 'travel', 'sport', 'night', 'formal'])
   @IsOptional()
   occasion?: string;
 
-  @ApiProperty({ enum: ['Street', 'Minimalist', 'Formal', 'Boho', 'Vintage', 'Casual'], required: false })
+  @ApiProperty({
+    enum: ['Street', 'Minimalist', 'Formal', 'Boho', 'Vintage', 'Casual'],
+    required: false,
+  })
   @IsEnum(['Street', 'Minimalist', 'Formal', 'Boho', 'Vintage', 'Casual'])
   @IsOptional()
   style?: string;

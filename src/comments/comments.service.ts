@@ -18,14 +18,20 @@ export class CommentsService {
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
   ) {}
 
-  async create(postId: string, userId: string, createCommentDto: CreateCommentDto): Promise<any> {
+  async create(
+    postId: string,
+    userId: string,
+    createCommentDto: CreateCommentDto,
+  ): Promise<any> {
     const post = await this.postModel.findById(postId);
     if (!post) {
       throw new NotFoundException('Post not found');
     }
 
     if (createCommentDto.parentCommentId) {
-      const parentComment = await this.commentModel.findById(createCommentDto.parentCommentId);
+      const parentComment = await this.commentModel.findById(
+        createCommentDto.parentCommentId,
+      );
       if (!parentComment) {
         throw new NotFoundException('Parent comment not found');
       }
@@ -35,7 +41,9 @@ export class CommentsService {
       }
 
       if (parentComment.postId.toString() !== postId) {
-        throw new BadRequestException('Parent comment does not belong to this post');
+        throw new BadRequestException(
+          'Parent comment does not belong to this post',
+        );
       }
     }
 
@@ -55,7 +63,11 @@ export class CommentsService {
       .lean();
   }
 
-  async findAll(postId: string, page: number = 1, limit: number = 50): Promise<PaginatedResponseDto<any>> {
+  async findAll(
+    postId: string,
+    page: number = 1,
+    limit: number = 50,
+  ): Promise<PaginatedResponseDto<any>> {
     const skip = (page - 1) * limit;
 
     const [comments, total] = await Promise.all([
@@ -66,7 +78,10 @@ export class CommentsService {
         .limit(limit)
         .populate('userId', 'username avatar firstName lastName')
         .lean(),
-      this.commentModel.countDocuments({ postId: new Types.ObjectId(postId), parentCommentId: null }),
+      this.commentModel.countDocuments({
+        postId: new Types.ObjectId(postId),
+        parentCommentId: null,
+      }),
     ]);
 
     const commentsWithReplies = await Promise.all(
@@ -87,7 +102,11 @@ export class CommentsService {
     return new PaginatedResponseDto(commentsWithReplies, page, limit, total);
   }
 
-  async remove(commentId: string, userId: string, postId: string): Promise<{ deleted: boolean }> {
+  async remove(
+    commentId: string,
+    userId: string,
+    postId: string,
+  ): Promise<{ deleted: boolean }> {
     const comment = await this.commentModel.findById(commentId);
 
     if (!comment) {
@@ -98,7 +117,9 @@ export class CommentsService {
       throw new ForbiddenException('You can only delete your own comments');
     }
 
-    const repliesToDelete = await this.commentModel.find({ parentCommentId: commentId });
+    const repliesToDelete = await this.commentModel.find({
+      parentCommentId: commentId,
+    });
     const totalToDelete = 1 + repliesToDelete.length;
 
     await this.commentModel.deleteMany({

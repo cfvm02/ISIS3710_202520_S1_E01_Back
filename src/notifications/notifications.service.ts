@@ -1,19 +1,27 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Notification, NotificationDocument } from '../schemas/notification.schema';
+import {
+  Notification,
+  NotificationDocument,
+} from '../schemas/notification.schema';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
+import { FileUrlService } from '../common/services/file-url.service';
 
 @Injectable()
 export class NotificationsService {
   constructor(
-    @InjectModel(Notification.name) private notificationModel: Model<NotificationDocument>,
+    @InjectModel(Notification.name)
+    private notificationModel: Model<NotificationDocument>,
+    private readonly fileUrlService: FileUrlService,
   ) {}
 
-  async findAll(userId: string, unread?: boolean, page: number = 1, limit: number = 50): Promise<any> {
+  async findAll(
+    userId: string,
+    unread?: boolean,
+    page: number = 1,
+    limit: number = 50,
+  ): Promise<any> {
     const skip = (page - 1) * limit;
     const query: any = { recipientId: new Types.ObjectId(userId) };
 
@@ -31,10 +39,35 @@ export class NotificationsService {
         .populate('postId', 'imageUrl description')
         .lean(),
       this.notificationModel.countDocuments(query),
-      this.notificationModel.countDocuments({ recipientId: new Types.ObjectId(userId), isRead: false }),
+      this.notificationModel.countDocuments({
+        recipientId: new Types.ObjectId(userId),
+        isRead: false,
+      }),
     ]);
 
-    const paginatedData = new PaginatedResponseDto(notifications, page, limit, total);
+    const normalizedNotifications = notifications.map((notification) => {
+      const post: any = notification.postId as any;
+      if (post && typeof post === 'object' && 'imageUrl' in post) {
+        const normalizedImageUrl =
+          this.fileUrlService.toPublicUrl(post.imageUrl) || post.imageUrl;
+
+        return {
+          ...notification,
+          postId: {
+            ...post,
+            imageUrl: normalizedImageUrl,
+          },
+        };
+      }
+      return notification;
+    });
+
+    const paginatedData = new PaginatedResponseDto(
+      normalizedNotifications,
+      page,
+      limit,
+      total,
+    );
 
     return {
       ...paginatedData,
@@ -42,7 +75,10 @@ export class NotificationsService {
     };
   }
 
-  async markAsRead(notificationId: string, userId: string): Promise<{ read: boolean }> {
+  async markAsRead(
+    notificationId: string,
+    userId: string,
+  ): Promise<{ read: boolean }> {
     const notification = await this.notificationModel.findOne({
       _id: notificationId,
       recipientId: new Types.ObjectId(userId),
@@ -67,7 +103,10 @@ export class NotificationsService {
     return { updated: result.modifiedCount };
   }
 
-  async remove(notificationId: string, userId: string): Promise<{ deleted: boolean }> {
+  async remove(
+    notificationId: string,
+    userId: string,
+  ): Promise<{ deleted: boolean }> {
     const notification = await this.notificationModel.findOneAndDelete({
       _id: notificationId,
       recipientId: new Types.ObjectId(userId),

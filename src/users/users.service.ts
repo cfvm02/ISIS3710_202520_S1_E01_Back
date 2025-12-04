@@ -8,7 +8,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { User, UserDocument } from '../schemas/user.schema';
 import { Follow, FollowDocument } from '../schemas/follow.schema';
-import { BlockedUser, BlockedUserDocument } from '../schemas/blocked-user.schema';
+import {
+  BlockedUser,
+  BlockedUserDocument,
+} from '../schemas/blocked-user.schema';
 import { Post, PostDocument } from '../schemas/post.schema';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
 import { UserProfileResponseDto } from './dto/user-profile-response.dto';
@@ -19,11 +22,15 @@ export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Follow.name) private followModel: Model<FollowDocument>,
-    @InjectModel(BlockedUser.name) private blockedUserModel: Model<BlockedUserDocument>,
+    @InjectModel(BlockedUser.name)
+    private blockedUserModel: Model<BlockedUserDocument>,
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
   ) {}
 
-  async getUserProfile(userId: string, currentUserId?: string): Promise<UserProfileResponseDto> {
+  async getUserProfile(
+    userId: string,
+    currentUserId?: string,
+  ): Promise<UserProfileResponseDto> {
     const user = await this.userModel.findById(userId);
 
     if (!user) {
@@ -76,7 +83,7 @@ export class UsersService {
     page: number = 1,
     limit: number = 20,
     status: string = 'published',
-  ): Promise<PaginatedResponseDto<any>> {
+  ): Promise<any> {
     const user = await this.userModel.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -96,7 +103,10 @@ export class UsersService {
       this.postModel.countDocuments(query),
     ]);
 
-    return new PaginatedResponseDto(posts, page, limit, total);
+    return {
+      posts,
+      total,
+    };
   }
 
   async getFollowers(
@@ -112,7 +122,10 @@ export class UsersService {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('followerId', 'username avatar firstName lastName bio style followersCount')
+        .populate(
+          'followerId',
+          'username avatar firstName lastName bio style followersCount',
+        )
         .lean(),
       this.followModel.countDocuments({ followeeId: userId }),
     ]);
@@ -135,7 +148,10 @@ export class UsersService {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('followeeId', 'username avatar firstName lastName bio style followersCount')
+        .populate(
+          'followeeId',
+          'username avatar firstName lastName bio style followersCount',
+        )
         .lean(),
       this.followModel.countDocuments({ followerId: userId }),
     ]);
@@ -145,7 +161,10 @@ export class UsersService {
     return new PaginatedResponseDto(users, page, limit, total);
   }
 
-  async followUser(currentUserId: string, userIdToFollow: string): Promise<FollowResponseDto> {
+  async followUser(
+    currentUserId: string,
+    userIdToFollow: string,
+  ): Promise<FollowResponseDto> {
     if (currentUserId === userIdToFollow) {
       throw new BadRequestException('You cannot follow yourself');
     }
@@ -196,7 +215,10 @@ export class UsersService {
     };
   }
 
-  async unfollowUser(currentUserId: string, userIdToUnfollow: string): Promise<FollowResponseDto> {
+  async unfollowUser(
+    currentUserId: string,
+    userIdToUnfollow: string,
+  ): Promise<FollowResponseDto> {
     const follow = await this.followModel.findOneAndDelete({
       followerId: currentUserId,
       followeeId: userIdToUnfollow,
@@ -222,7 +244,10 @@ export class UsersService {
     };
   }
 
-  async blockUser(currentUserId: string, userIdToBlock: string): Promise<BlockResponseDto> {
+  async blockUser(
+    currentUserId: string,
+    userIdToBlock: string,
+  ): Promise<BlockResponseDto> {
     if (currentUserId === userIdToBlock) {
       throw new BadRequestException('You cannot block yourself');
     }
@@ -256,7 +281,10 @@ export class UsersService {
     return { blocked: true };
   }
 
-  async unblockUser(currentUserId: string, userIdToUnblock: string): Promise<BlockResponseDto> {
+  async unblockUser(
+    currentUserId: string,
+    userIdToUnblock: string,
+  ): Promise<BlockResponseDto> {
     const block = await this.blockedUserModel.findOneAndDelete({
       blockerId: currentUserId,
       blockedId: userIdToUnblock,

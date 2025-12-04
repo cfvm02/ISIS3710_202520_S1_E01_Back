@@ -59,7 +59,9 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
     const { email, password } = loginDto;
 
-    const user = await this.userModel.findOne({ email }).select('+passwordHash');
+    const user = await this.userModel
+      .findOne({ email })
+      .select('+passwordHash');
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -83,14 +85,20 @@ export class AuthService {
     };
   }
 
-  async refresh(userId: string, refreshToken: string): Promise<{ token: string; refreshToken: string }> {
+  async refresh(
+    userId: string,
+    refreshToken: string,
+  ): Promise<{ token: string; refreshToken: string }> {
     const user = await this.userModel.findById(userId).select('+refreshToken');
 
     if (!user || !user.refreshToken) {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const isRefreshTokenValid = await bcrypt.compare(refreshToken, user.refreshToken);
+    const isRefreshTokenValid = await bcrypt.compare(
+      refreshToken,
+      user.refreshToken,
+    );
 
     if (!isRefreshTokenValid) {
       throw new UnauthorizedException('Invalid refresh token');
@@ -112,7 +120,10 @@ export class AuthService {
     return this.mapUserToResponse(user);
   }
 
-  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto): Promise<UserResponseDto> {
+  async updateProfile(
+    userId: string,
+    updateProfileDto: UpdateProfileDto,
+  ): Promise<UserResponseDto> {
     if (updateProfileDto.username) {
       const existingUser = await this.userModel.findOne({
         username: updateProfileDto.username,
@@ -137,8 +148,14 @@ export class AuthService {
     return this.mapUserToResponse(user);
   }
 
-  private async generateTokens(user: UserDocument): Promise<{ token: string; refreshToken: string }> {
-    const payload = { sub: user._id.toString(), username: user.username, email: user.email };
+  private async generateTokens(
+    user: UserDocument,
+  ): Promise<{ token: string; refreshToken: string }> {
+    const payload = {
+      sub: user._id.toString(),
+      username: user.username,
+      email: user.email,
+    };
 
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
@@ -153,7 +170,10 @@ export class AuthService {
     return { token, refreshToken };
   }
 
-  private async updateRefreshToken(userId: string, refreshToken: string): Promise<void> {
+  private async updateRefreshToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<void> {
     const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
     await this.userModel.findByIdAndUpdate(userId, {
       refreshToken: hashedRefreshToken,

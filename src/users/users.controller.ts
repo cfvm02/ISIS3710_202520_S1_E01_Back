@@ -5,7 +5,6 @@ import {
   Delete,
   Param,
   Query,
-  UseGuards,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
@@ -64,13 +63,26 @@ export class UsersController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'status', required: false, enum: ['published', 'draft'] })
-  @ApiResponse({ status: 200, description: 'Posts retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Posts retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        posts: {
+          type: 'array',
+          items: { type: 'object' },
+        },
+        total: { type: 'number' },
+      },
+    },
+  })
   async getUserPosts(
     @Param('userId') userId: string,
     @Query('page') page?: number,
     @Query('limit') limit?: number,
     @Query('status') status?: string,
-  ): Promise<PaginatedResponseDto<any>> {
+  ): Promise<{ posts: any[]; total: number }> {
     return this.usersService.getUserPosts(userId, page, limit, status);
   }
 

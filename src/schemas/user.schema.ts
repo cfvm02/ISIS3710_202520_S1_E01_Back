@@ -30,7 +30,10 @@ export class User extends Document {
   @Prop({ default: null })
   location: string;
 
-  @Prop({ enum: ['Street', 'Minimalist', 'Formal', 'Boho', 'Vintage', 'Casual'], default: 'Casual' })
+  @Prop({
+    enum: ['Street', 'Minimalist', 'Formal', 'Boho', 'Vintage', 'Casual'],
+    default: 'Casual',
+  })
   style: string;
 
   @Prop({ enum: ['en', 'es'], default: 'en' })
