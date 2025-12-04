@@ -1,98 +1,185 @@
+# StyleBox API – Backend NestJS
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <a href="http://nestjs.com/" target="_blank">
+    <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
+  </a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  API desarrollada en Node.js usando el framework NestJS para gestionar usuarios, posts, likes, seguidores, colecciones y funcionalidades sociales de la plataforma StyleBox.
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+# Integrantes del Equipo
 
-## Project setup
+| Estudiante                       | Rol                               | Responsabilidades                                                                 |
+|----------------------------------|------------------------------------|-----------------------------------------------------------------------------------|
+| Carlos Felipe Vargas Morales     | Backend & Integración API          | Likes, módulo PostLikes, endpoints REST, middleware, pruebas con Postman          |
+| Silvana Echeverry                | Frontend & UI/UX                   | Integración con API, diseño UI/UX, pantallas del feed y detalle de post           |
+| Alejandra Fruto                  | Base de Datos & Documentación      | MongoDB Atlas, validación de datos, estructura de colecciones, documentación      |
+| Daniel Bolívar                   | Funcionalidades Adicionales        | Validaciones, pruebas, optimización, soporte en backend/frontend                  |
 
-```bash
-$ npm install
+---
+
+# Descripción del Proyecto
+
+StyleBox es una plataforma social enfocada en moda, donde los usuarios pueden subir outfits, descubrir estilos, seguir a otros usuarios, guardar prendas favoritas y visualizar un feed personalizado.
+
+---
+
+# Este backend administra
+
+- Gestión de usuarios  
+- Publicación de posts y outfits  
+- Relaciones sociales (seguidores / seguidos)  
+- Likes y comentarios  
+- Colecciones y elementos guardados  
+- Feed global y feed personalizado  
+- Persistencia en MongoDB Atlas mediante Mongoose  
+
+---
+
+# Historias de Usuario y Funcionalidades
+
+A continuación se presentan las historias de usuario implementadas, con la indicación de quién fue responsable de cada una.
+
+---
+
+# Historia de Usuario 1  
+**Responsable: Alejandra Fruto**
+
+## Funcionalidad 1. Botón de seguir / dejar de seguir  
+Botón dinámico según estado actual: “Seguir” o “Siguiendo”.  
+Actualización en tiempo real.  
+Confirmación antes de dejar de seguir.
+
+## Funcionalidad 2. Listado de seguidores y seguidos  
+Lista de seguidos con opción de buscarlos o dejarlos de seguir.  
+Lista de seguidores con opción de seguir de vuelta.
+
+## Funcionalidad 3. Notificaciones de nuevas publicaciones  
+Notificaciones cuando un usuario seguido sube un nuevo outfit.  
+Indicador de publicaciones no vistas.
+
+## Funcionalidad 4. Visualización desde seguidores/seguidos  
+Vista del perfil.  
+Galería de publicaciones.  
+Botón seguir/dejar de seguir desde el perfil.  
+Indicadores de estilo del usuario.
+
+---
+
+# Historia de Usuario 2  
+**Responsable: Silvana Echeverry**
+
+## Funcionalidad 1. Visualización del feed de prendas y outfits  
+Tarjetas con rating y botón de guardar.
+
+## Funcionalidad 2. Botón de guardar  
+Guardar prendas en colecciones personalizadas.
+
+## Funcionalidad 3. Página de guardados  
+Vista agrupada por colecciones creadas por el usuario.
+
+## Funcionalidad 4. Gestión de colecciones  
+Crear, editar y eliminar colecciones.  
+Ver cantidad de items y categorías.
+
+---
+
+# Historia de Usuario 3  
+**Responsable: Carlos Vargas**
+
+## Funcionalidad 1. Visualización del outfit subido  
+Imagen principal del outfit.  
+Listado de prendas con nombre y marca.
+
+## Funcionalidad 2. Metadatos del outfit  
+Tags (Casual, Streetwear, Summer).  
+Caption descriptivo opcional.
+
+## Funcionalidad 3. Interacciones sociales  
+Botones de like, comentario y compartir.  
+Conteo visible de acciones.  
+Comentarios con avatar, nombre y tiempo.
+
+## Funcionalidad 4. Accesibilidad y diseño consistente  
+Jerarquía visual clara.  
+Tipografías diferenciadas.  
+Botones con iconografía intuitiva.
+
+---
+
+# Historia de Usuario 4  
+**Responsable: Daniel Bolivar**
+
+## Funcionalidad 1. Feed personalizado  
+Orden basado en afinidad (estilos seguidos y talla).  
+Alternativa: orden por fecha.
+
+## Funcionalidad 2. Filtros por ocasión  
+Chips: Fiesta, Oficina, Viaje.  
+Filtrado manteniendo relevancia.
+
+## Funcionalidad 3. Pestaña Discover  
+Mosaico con tendencias, estilos, categorías y ocasiones.
+
+## Funcionalidad 4. Sub-feed Discover  
+Vista filtrada con scroll vertical.  
+Acceso a detalle de prendas/outfits.  
+Posibilidad de guardar directamente.
+
+---
+
+# Tecnologías Utilizadas
+
+- NestJS  
+- Node.js + TypeScript  
+- MongoDB Atlas + Mongoose  
+- JWT  
+- Docker  
+
+---
+
+# Project Setup
+
+```
+npm install
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+# Run the Project
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+npm run start
+npm run start:dev
+npm run start:prod
 ```
 
-## Run tests
+---
 
-```bash
-# unit tests
-$ npm run test
+# Run Tests
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+npm run test
+npm run test:e2e
+npm run test:cov
 ```
 
-## Deployment
+---
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+# Deployment
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+NestJS puede desplegarse fácilmente en:
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+- Vercel (serverless)  
+- Render  
+- Railway  
+- Google Cloud Platform (GCP)  
+- Docker  
+- MongoDB Atlas como base de datos administrada  
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+---
