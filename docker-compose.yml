@@ -22,7 +22,7 @@ services:
       - '3000:3000'
     environment:
       - NODE_ENV=development
-      - MONGODB_URI=mongodb://mongodb:27017/stylebox
+      - MONGODB_URI=${MONGODB_URI}
     volumes:
       - .:/app
       - /app/node_modules
