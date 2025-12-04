@@ -16,7 +16,13 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     ]);
 
     if (isPublic) {
-      return true;
+      // For public endpoints, try to authenticate if a token is present
+      // but don't fail if there's no token
+      const result = super.canActivate(context);
+      if (result instanceof Promise) {
+        return result.catch(() => true);
+      }
+      return result || true;
     }
 
     return super.canActivate(context);

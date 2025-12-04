@@ -37,16 +37,25 @@ export class CollectionsService {
   }
 
   async findAll(userId: string): Promise<any[]> {
+    console.log('🔍 [DEBUG] findAll called with userId:', userId, 'type:', typeof userId);
+
+    const query = { userId: new Types.ObjectId(userId) };
+    console.log('🔍 [DEBUG] Query object:', query);
+
     const collections = await this.collectionModel
-      .find({ userId: new Types.ObjectId(userId) })
+      .find(query)
       .sort({ createdAt: -1 })
       .lean();
+
+    console.log('🔍 [DEBUG] Found collections count:', collections.length);
 
     const collectionsWithCount = await Promise.all(
       collections.map(async (collection) => {
         const itemsCount = await this.collectionItemModel.countDocuments({
           collectionId: collection._id,
         });
+        
+        console.log(`🔍 [DEBUG] Collection "${collection.title}" (${collection._id}): itemsCount = ${itemsCount}`);
 
         return {
           ...collection,
@@ -55,22 +64,36 @@ export class CollectionsService {
       }),
     );
 
+    console.log('🔍 [DEBUG] Returning collections with counts:', collectionsWithCount.length);
+    console.log('🔍 [DEBUG] Sample collection with count:', collectionsWithCount[0]);
     return collectionsWithCount;
   }
 
   async findOne(collectionId: string, userId?: string): Promise<any> {
+    console.log('🔍 findOne called:');
+    console.log('  collectionId:', collectionId);
+    console.log('  userId (from JWT):', userId, 'type:', typeof userId);
+
     const collection = await this.collectionModel.findById(collectionId).lean();
 
     if (!collection) {
       throw new NotFoundException('Collection not found');
     }
 
+    console.log('  collection.userId:', collection.userId, 'type:', typeof collection.userId);
+    console.log('  collection.isPublic:', collection.isPublic);
+    console.log('  collection.userId.toString():', collection.userId.toString());
+    console.log('  Comparison:', collection.userId.toString(), '===', userId, '?', collection.userId.toString() === userId);
+
     if (
       !collection.isPublic &&
       (!userId || collection.userId.toString() !== userId)
     ) {
+      console.log('❌ FORBIDDEN - Reason:', !userId ? 'No userId' : 'userId mismatch');
       throw new ForbiddenException('This collection is private');
     }
+
+    console.log('✅ Access granted');
 
     const items = await this.collectionItemModel
       .find({ collectionId: new Types.ObjectId(collectionId) })
