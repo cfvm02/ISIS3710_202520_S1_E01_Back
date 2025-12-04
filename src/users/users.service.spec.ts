@@ -54,7 +54,10 @@ describe('UsersService', () => {
         UsersService,
         { provide: getModelToken('User'), useValue: userModelMock },
         { provide: getModelToken('Follow'), useValue: followModelMock },
-        { provide: getModelToken('BlockedUser'), useValue: blockedUserModelMock },
+        {
+          provide: getModelToken('BlockedUser'),
+          useValue: blockedUserModelMock,
+        },
         { provide: getModelToken('Post'), useValue: postModelMock },
       ],
     }).compile();
@@ -72,7 +75,9 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user does not exist', async () => {
       userModelMock.findById.mockResolvedValue(null);
 
-      await expect(service.getUserProfile(validId)).rejects.toThrow(NotFoundException);
+      await expect(service.getUserProfile(validId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should return profile without follow info if no currentUserId', async () => {
@@ -114,7 +119,9 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user not found', async () => {
       userModelMock.findById.mockResolvedValue(null);
 
-      await expect(service.getUserPosts(validId)).rejects.toThrow(NotFoundException);
+      await expect(service.getUserPosts(validId)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should return posts and total count', async () => {
@@ -212,18 +219,18 @@ describe('UsersService', () => {
     it('should throw NotFoundException if target does not exist', async () => {
       userModelMock.findById.mockResolvedValue(null);
 
-      await expect(service.followUser(validId, '507f1f77bcf86cd799439012')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.followUser(validId, '507f1f77bcf86cd799439012'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ConflictException if already following', async () => {
       userModelMock.findById.mockResolvedValue({});
       followModelMock.findOne.mockResolvedValue({}); // already exists
 
-      await expect(service.followUser(validId, '507f1f77bcf86cd799439013')).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        service.followUser(validId, '507f1f77bcf86cd799439013'),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should follow successfully', async () => {
@@ -234,7 +241,10 @@ describe('UsersService', () => {
       followModelMock.create.mockResolvedValue({});
       userModelMock.findByIdAndUpdate.mockResolvedValue({ followersCount: 3 });
 
-      const result = await service.followUser(validId, '507f1f77bcf86cd799439014');
+      const result = await service.followUser(
+        validId,
+        '507f1f77bcf86cd799439014',
+      );
 
       expect(result.isFollowing).toBe(true);
       expect(result.followersCount).toBe(3);
@@ -281,18 +291,18 @@ describe('UsersService', () => {
     it('should throw NotFoundException if user not found', async () => {
       userModelMock.findById.mockResolvedValue(null);
 
-      await expect(service.blockUser(validId, '507f1f77bcf86cd799439016')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.blockUser(validId, '507f1f77bcf86cd799439016'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ConflictException if already blocked', async () => {
       userModelMock.findById.mockResolvedValue({});
       blockedUserModelMock.findOne.mockResolvedValue({});
 
-      await expect(service.blockUser(validId, '507f1f77bcf86cd799439017')).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        service.blockUser(validId, '507f1f77bcf86cd799439017'),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should block user successfully', async () => {
@@ -301,7 +311,10 @@ describe('UsersService', () => {
 
       blockedUserModelMock.create.mockResolvedValue({});
 
-      const result = await service.blockUser(validId, '507f1f77bcf86cd799439018');
+      const result = await service.blockUser(
+        validId,
+        '507f1f77bcf86cd799439018',
+      );
 
       expect(result.blocked).toBe(true);
     });
@@ -323,7 +336,10 @@ describe('UsersService', () => {
     it('should unblock successfully', async () => {
       blockedUserModelMock.findOneAndDelete.mockResolvedValue({});
 
-      const result = await service.unblockUser(validId, '507f1f77bcf86cd799439019');
+      const result = await service.unblockUser(
+        validId,
+        '507f1f77bcf86cd799439019',
+      );
 
       expect(result.blocked).toBe(false);
     });

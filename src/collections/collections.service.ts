@@ -37,7 +37,12 @@ export class CollectionsService {
   }
 
   async findAll(userId: string): Promise<any[]> {
-    console.log('🔍 [DEBUG] findAll called with userId:', userId, 'type:', typeof userId);
+    console.log(
+      '🔍 [DEBUG] findAll called with userId:',
+      userId,
+      'type:',
+      typeof userId,
+    );
 
     const query = { userId: new Types.ObjectId(userId) };
     console.log('🔍 [DEBUG] Query object:', query);
@@ -55,7 +60,9 @@ export class CollectionsService {
           collectionId: collection._id,
         });
 
-        console.log(`🔍 [DEBUG] Collection "${collection.title}" (${collection._id}): itemsCount = ${itemsCount}`);
+        console.log(
+          `🔍 [DEBUG] Collection "${collection.title}" (${collection._id}): itemsCount = ${itemsCount}`,
+        );
 
         return {
           ...collection,
@@ -64,8 +71,14 @@ export class CollectionsService {
       }),
     );
 
-    console.log('🔍 [DEBUG] Returning collections with counts:', collectionsWithCount.length);
-    console.log('🔍 [DEBUG] Sample collection with count:', collectionsWithCount[0]);
+    console.log(
+      '🔍 [DEBUG] Returning collections with counts:',
+      collectionsWithCount.length,
+    );
+    console.log(
+      '🔍 [DEBUG] Sample collection with count:',
+      collectionsWithCount[0],
+    );
     return collectionsWithCount;
   }
 
@@ -80,16 +93,34 @@ export class CollectionsService {
       throw new NotFoundException('Collection not found');
     }
 
-    console.log('  collection.userId:', collection.userId, 'type:', typeof collection.userId);
+    console.log(
+      '  collection.userId:',
+      collection.userId,
+      'type:',
+      typeof collection.userId,
+    );
     console.log('  collection.isPublic:', collection.isPublic);
-    console.log('  collection.userId.toString():', collection.userId.toString());
-    console.log('  Comparison:', collection.userId.toString(), '===', userId, '?', collection.userId.toString() === userId);
+    console.log(
+      '  collection.userId.toString():',
+      collection.userId.toString(),
+    );
+    console.log(
+      '  Comparison:',
+      collection.userId.toString(),
+      '===',
+      userId,
+      '?',
+      collection.userId.toString() === userId,
+    );
 
     if (
       !collection.isPublic &&
       (!userId || collection.userId.toString() !== userId)
     ) {
-      console.log('❌ FORBIDDEN - Reason:', !userId ? 'No userId' : 'userId mismatch');
+      console.log(
+        '❌ FORBIDDEN - Reason:',
+        !userId ? 'No userId' : 'userId mismatch',
+      );
       throw new ForbiddenException('This collection is private');
     }
 
@@ -177,9 +208,24 @@ export class CollectionsService {
       throw new NotFoundException('Collection not found');
     }
 
-    console.log('  collection.userId:', collection.userId, 'type:', typeof collection.userId);
-    console.log('  collection.userId.toString():', collection.userId.toString());
-    console.log('  Comparison:', collection.userId.toString(), '===', userId, '?', collection.userId.toString() === userId);
+    console.log(
+      '  collection.userId:',
+      collection.userId,
+      'type:',
+      typeof collection.userId,
+    );
+    console.log(
+      '  collection.userId.toString():',
+      collection.userId.toString(),
+    );
+    console.log(
+      '  Comparison:',
+      collection.userId.toString(),
+      '===',
+      userId,
+      '?',
+      collection.userId.toString() === userId,
+    );
 
     if (collection.userId.toString() !== userId) {
       console.log('❌ FORBIDDEN: userId mismatch');

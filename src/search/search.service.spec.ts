@@ -34,7 +34,10 @@ describe('SearchService', () => {
         SearchService,
         { provide: getModelToken('Post'), useValue: postModelMock },
         { provide: getModelToken('User'), useValue: userModelMock },
-        { provide: getModelToken('BlockedUser'), useValue: blockedUserModelMock },
+        {
+          provide: getModelToken('BlockedUser'),
+          useValue: blockedUserModelMock,
+        },
       ],
     }).compile();
 

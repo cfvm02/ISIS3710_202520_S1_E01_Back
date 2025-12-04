@@ -363,7 +363,12 @@ export class PostsService {
     userId?: string,
   ): Promise<any[]> {
     if (!userId) {
-      return posts;
+      return posts.map((post) => ({
+        ...post,
+        isLiked: false,
+        isSaved: false,
+        userRating: null,
+      }));
     }
 
     const postIds = posts.map((p) => p._id);
