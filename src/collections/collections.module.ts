@@ -3,7 +3,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CollectionsController } from './collections.controller';
 import { CollectionsService } from './collections.service';
 import { Collection, CollectionSchema } from '../schemas/collection.schema';
-import { CollectionItem, CollectionItemSchema } from '../schemas/collection-item.schema';
+import {
+  CollectionItem,
+  CollectionItemSchema,
+} from '../schemas/collection-item.schema';
 import { Post, PostSchema } from '../schemas/post.schema';
 
 @Module({

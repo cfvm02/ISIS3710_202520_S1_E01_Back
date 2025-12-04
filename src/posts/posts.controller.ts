@@ -21,7 +21,7 @@ import { PostsService } from './posts.service';
 import { CreatePostDto, UpdatePostDto } from './dto/create-post.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
-import { PaginatedResponseDto } from '../common/dto/pagination.dto';
+import { PaginatedPostsResponseDto } from './dto/paginated-posts-response.dto';
 
 @ApiTags('Posts')
 @Controller('posts')
@@ -65,7 +65,7 @@ export class PostsController {
     @Query('tags') tags?: string,
     @Query('status') status?: string,
     @CurrentUser('userId') currentUserId?: string,
-  ): Promise<PaginatedResponseDto<any>> {
+  ): Promise<PaginatedPostsResponseDto> {
     return this.postsService.findAll(
       page,
       limit,
@@ -114,7 +114,10 @@ export class PostsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update post' })
   @ApiResponse({ status: 200, description: 'Post updated successfully' })
-  @ApiResponse({ status: 403, description: 'You can only update your own posts' })
+  @ApiResponse({
+    status: 403,
+    description: 'You can only update your own posts',
+  })
   @ApiResponse({ status: 404, description: 'Post not found' })
   update(
     @Param('id') id: string,
@@ -129,7 +132,10 @@ export class PostsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete post' })
   @ApiResponse({ status: 200, description: 'Post deleted successfully' })
-  @ApiResponse({ status: 403, description: 'You can only delete your own posts' })
+  @ApiResponse({
+    status: 403,
+    description: 'You can only delete your own posts',
+  })
   @ApiResponse({ status: 404, description: 'Post not found' })
   remove(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.postsService.remove(id, userId);

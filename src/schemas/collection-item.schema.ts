@@ -15,7 +15,8 @@ export class CollectionItem extends Document {
   savedAt: Date;
 }
 
-export const CollectionItemSchema = SchemaFactory.createForClass(CollectionItem);
+export const CollectionItemSchema =
+  SchemaFactory.createForClass(CollectionItem);
 
 CollectionItemSchema.index({ collectionId: 1, postId: 1 }, { unique: true });
 CollectionItemSchema.index({ collectionId: 1 });

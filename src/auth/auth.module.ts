@@ -17,7 +17,8 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET') || 'default-secret',
         signOptions: {
-          expiresIn: (configService.get<string>('JWT_EXPIRATION') || '1h') as any,
+          expiresIn: (configService.get<string>('JWT_EXPIRATION') ||
+            '1h') as any,
         },
       }),
       inject: [ConfigService],

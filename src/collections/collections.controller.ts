@@ -16,7 +16,11 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CollectionsService } from './collections.service';
-import { CreateCollectionDto, UpdateCollectionDto, AddPostToCollectionDto } from './dto/collection.dto';
+import {
+  CreateCollectionDto,
+  UpdateCollectionDto,
+  AddPostToCollectionDto,
+} from './dto/collection.dto';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Public } from '../common/decorators/public.decorator';
 
@@ -39,7 +43,10 @@ export class CollectionsController {
   @Get()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all collections for current user' })
-  @ApiResponse({ status: 200, description: 'Collections retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Collections retrieved successfully',
+  })
   findAll(@CurrentUser('userId') userId: string) {
     return this.collectionsService.findAll(userId);
   }
@@ -47,11 +54,12 @@ export class CollectionsController {
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Get collection by id' })
-  @ApiResponse({ status: 200, description: 'Collection retrieved successfully' })
-  findOne(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId?: string,
-  ) {
+  @ApiResponse({
+    status: 200,
+    description: 'Collection retrieved successfully',
+  })
+  findOne(@Param('id') id: string, @CurrentUser() user?: any) {
+    const userId = user?.userId;
     return this.collectionsService.findOne(id, userId);
   }
 
@@ -79,7 +87,10 @@ export class CollectionsController {
   @Post(':id/items')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Add post to collection' })
-  @ApiResponse({ status: 201, description: 'Post added to collection successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'Post added to collection successfully',
+  })
   addPost(
     @Param('id') id: string,
     @CurrentUser('userId') userId: string,
@@ -92,7 +103,10 @@ export class CollectionsController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Remove post from collection' })
-  @ApiResponse({ status: 200, description: 'Post removed from collection successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Post removed from collection successfully',
+  })
   removePost(
     @Param('id') id: string,
     @Param('postId') postId: string,

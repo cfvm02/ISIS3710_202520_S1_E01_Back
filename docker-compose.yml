@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:7.0
@@ -36,6 +34,8 @@ services:
 
 volumes:
   mongodb_data:
+    external: true
+    name: backend-web_mongodb_data
 
 networks:
   stylebox-network:

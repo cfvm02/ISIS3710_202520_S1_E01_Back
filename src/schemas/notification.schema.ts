@@ -13,7 +13,7 @@ export class Notification extends Document {
 
   @Prop({
     required: true,
-    enum: ['new_post', 'follow', 'like', 'comment', 'rating']
+    enum: ['new_post', 'follow', 'like', 'comment', 'rating'],
   })
   type: string;
 

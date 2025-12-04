@@ -6,8 +6,12 @@ import { Post, PostSchema } from '../schemas/post.schema';
 import { PostLike, PostLikeSchema } from '../schemas/post-like.schema';
 import { User, UserSchema } from '../schemas/user.schema';
 import { Follow, FollowSchema } from '../schemas/follow.schema';
-import { CollectionItem, CollectionItemSchema } from '../schemas/collection-item.schema';
+import {
+  CollectionItem,
+  CollectionItemSchema,
+} from '../schemas/collection-item.schema';
 import { Rating, RatingSchema } from '../schemas/rating.schema';
+import { FileUrlService } from '../common/services/file-url.service';
 
 @Module({
   imports: [
@@ -21,7 +25,7 @@ import { Rating, RatingSchema } from '../schemas/rating.schema';
     ]),
   ],
   controllers: [PostsController],
-  providers: [PostsService],
+  providers: [PostsService, FileUrlService],
   exports: [PostsService],
 })
 export class PostsModule {}

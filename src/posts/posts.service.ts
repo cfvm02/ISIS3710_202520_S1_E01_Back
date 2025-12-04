@@ -10,10 +10,15 @@ import { Post, PostDocument } from '../schemas/post.schema';
 import { PostLike, PostLikeDocument } from '../schemas/post-like.schema';
 import { User, UserDocument } from '../schemas/user.schema';
 import { Follow, FollowDocument } from '../schemas/follow.schema';
-import { CollectionItem, CollectionItemDocument } from '../schemas/collection-item.schema';
+import {
+  CollectionItem,
+  CollectionItemDocument,
+} from '../schemas/collection-item.schema';
 import { Rating, RatingDocument } from '../schemas/rating.schema';
 import { CreatePostDto, UpdatePostDto } from './dto/create-post.dto';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
+import { PaginatedPostsResponseDto } from './dto/paginated-posts-response.dto';
+import { FileUrlService } from '../common/services/file-url.service';
 
 @Injectable()
 export class PostsService {
@@ -22,8 +27,10 @@ export class PostsService {
     @InjectModel(PostLike.name) private postLikeModel: Model<PostLikeDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Follow.name) private followModel: Model<FollowDocument>,
-    @InjectModel(CollectionItem.name) private collectionItemModel: Model<CollectionItemDocument>,
+    @InjectModel(CollectionItem.name)
+    private collectionItemModel: Model<CollectionItemDocument>,
     @InjectModel(Rating.name) private ratingModel: Model<RatingDocument>,
+    private readonly fileUrlService: FileUrlService,
   ) {}
 
   async create(userId: string, createPostDto: CreatePostDto): Promise<any> {
@@ -36,7 +43,8 @@ export class PostsService {
       $inc: { postsCount: 1 },
     });
 
-    return this.populatePost(post);
+    const populated = await this.populatePost(post);
+    return this.normalizePostMedia(populated);
   }
 
   async findAll(
@@ -51,7 +59,7 @@ export class PostsService {
     tags?: string,
     status: string = 'published',
     currentUserId?: string,
-  ): Promise<PaginatedResponseDto<any>> {
+  ): Promise<PaginatedPostsResponseDto> {
     const skip = (page - 1) * limit;
     const query: any = { status };
 
@@ -97,9 +105,23 @@ export class PostsService {
       this.postModel.countDocuments(query),
     ]);
 
-    const postsWithDetails = await this.addUserInteractions(posts, currentUserId);
+    const postsWithDetails = await this.addUserInteractions(
+      posts,
+      currentUserId,
+    );
 
-    return new PaginatedResponseDto(postsWithDetails, page, limit, total);
+    const normalizedPosts = postsWithDetails.map((post) =>
+      this.normalizePostMedia(post),
+    );
+
+    const paginatedResponse = new PaginatedResponseDto(
+      normalizedPosts,
+      page,
+      limit,
+      total,
+    );
+
+    return new PaginatedPostsResponseDto(paginatedResponse);
   }
 
   async findOne(postId: string, currentUserId?: string): Promise<any> {
@@ -140,15 +162,19 @@ export class PostsService {
       userRating = rating ? rating.score : (null as any);
     }
 
-    return {
+    return this.normalizePostMedia({
       ...post,
       isSaved,
       isLiked,
       userRating,
-    };
+    });
   }
 
-  async update(postId: string, userId: string, updatePostDto: UpdatePostDto): Promise<any> {
+  async update(
+    postId: string,
+    userId: string,
+    updatePostDto: UpdatePostDto,
+  ): Promise<any> {
     const post = await this.postModel.findById(postId);
 
     if (!post) {
@@ -164,7 +190,7 @@ export class PostsService {
       .populate('userId', 'username avatar firstName lastName isVerified')
       .lean();
 
-    return updatedPost;
+    return this.normalizePostMedia(updatedPost);
   }
 
   async remove(postId: string, userId: string): Promise<{ deleted: boolean }> {
@@ -193,7 +219,10 @@ export class PostsService {
     return { deleted: true };
   }
 
-  async likePost(postId: string, userId: string): Promise<{ liked: boolean; likesCount: number }> {
+  async likePost(
+    postId: string,
+    userId: string,
+  ): Promise<{ liked: boolean; likesCount: number }> {
     const post = await this.postModel.findById(postId);
 
     if (!post) {
@@ -226,7 +255,10 @@ export class PostsService {
     };
   }
 
-  async unlikePost(postId: string, userId: string): Promise<{ liked: boolean; likesCount: number }> {
+  async unlikePost(
+    postId: string,
+    userId: string,
+  ): Promise<{ liked: boolean; likesCount: number }> {
     const like = await this.postLikeModel.findOneAndDelete({
       postId: new Types.ObjectId(postId),
       userId: new Types.ObjectId(userId),
@@ -280,7 +312,43 @@ export class PostsService {
       .populate('userId', 'username avatar firstName lastName isVerified')
       .lean();
 
-    return posts;
+    return posts.map((post) => this.normalizePostMedia(post));
+  }
+
+  private normalizePostMedia(post: any): any {
+    if (!post) {
+      return post;
+    }
+
+    const normalize = (url?: string | null) => {
+      const publicUrl = this.fileUrlService.toPublicUrl(url);
+      if (publicUrl === null || publicUrl === undefined) {
+        return url ?? null;
+      }
+      return publicUrl;
+    };
+
+    const clothItems = Array.isArray(post.clothItems)
+      ? post.clothItems.map((item: any) => ({
+          ...item,
+          imageUrl: normalize(item?.imageUrl),
+        }))
+      : post.clothItems;
+
+    const id =
+      typeof post._id === 'object' && post._id && 'toString' in post._id
+        ? (post._id as any).toString()
+        : typeof post._id === 'string'
+          ? post._id
+          : post.id;
+
+    return {
+      ...post,
+      _id: id || post._id || post.id,
+      id,
+      imageUrl: normalize(post.imageUrl),
+      clothItems,
+    };
   }
 
   private async populatePost(post: PostDocument): Promise<any> {
@@ -290,7 +358,10 @@ export class PostsService {
       .lean();
   }
 
-  private async addUserInteractions(posts: any[], userId?: string): Promise<any[]> {
+  private async addUserInteractions(
+    posts: any[],
+    userId?: string,
+  ): Promise<any[]> {
     if (!userId) {
       return posts;
     }
@@ -319,7 +390,9 @@ export class PostsService {
 
     const likedPostIds = new Set(likes.map((l) => l.postId.toString()));
     const savedPostIds = new Set(savedItems.map((s) => s.postId.toString()));
-    const ratingMap = new Map(ratings.map((r) => [r.postId.toString(), r.score]));
+    const ratingMap = new Map(
+      ratings.map((r) => [r.postId.toString(), r.score]),
+    );
 
     return posts.map((post) => ({
       ...post,

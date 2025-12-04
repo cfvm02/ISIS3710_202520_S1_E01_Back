@@ -29,7 +29,10 @@ export class NotificationsController {
   @ApiQuery({ name: 'unread', required: false, type: Boolean })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiResponse({ status: 200, description: 'Notifications retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Notifications retrieved successfully',
+  })
   findAll(
     @CurrentUser('userId') userId: string,
     @Query('unread') unread?: boolean,
@@ -42,10 +45,7 @@ export class NotificationsController {
   @Patch(':id/read')
   @ApiOperation({ summary: 'Mark notification as read' })
   @ApiResponse({ status: 200, description: 'Notification marked as read' })
-  markAsRead(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId: string,
-  ) {
+  markAsRead(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.notificationsService.markAsRead(id, userId);
   }
 
@@ -59,11 +59,11 @@ export class NotificationsController {
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Delete notification' })
-  @ApiResponse({ status: 200, description: 'Notification deleted successfully' })
-  remove(
-    @Param('id') id: string,
-    @CurrentUser('userId') userId: string,
-  ) {
+  @ApiResponse({
+    status: 200,
+    description: 'Notification deleted successfully',
+  })
+  remove(@Param('id') id: string, @CurrentUser('userId') userId: string) {
     return this.notificationsService.remove(id, userId);
   }
 }

@@ -37,10 +37,14 @@ export class Post extends Document {
   @Prop({ type: [String], default: [] })
   tags: string[];
 
-  @Prop({ enum: ['party', 'work', 'casual', 'travel', 'sport', 'night', 'formal'] })
+  @Prop({
+    enum: ['party', 'work', 'casual', 'travel', 'sport', 'night', 'formal'],
+  })
   occasion: string;
 
-  @Prop({ enum: ['Street', 'Minimalist', 'Formal', 'Boho', 'Vintage', 'Casual'] })
+  @Prop({
+    enum: ['Street', 'Minimalist', 'Formal', 'Boho', 'Vintage', 'Casual'],
+  })
   style: string;
 
   @Prop()

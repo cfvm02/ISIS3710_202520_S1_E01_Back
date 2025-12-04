@@ -3,17 +3,26 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Post, PostDocument } from '../schemas/post.schema';
 import { User, UserDocument } from '../schemas/user.schema';
-import { BlockedUser, BlockedUserDocument } from '../schemas/blocked-user.schema';
+import {
+  BlockedUser,
+  BlockedUserDocument,
+} from '../schemas/blocked-user.schema';
 
 @Injectable()
 export class SearchService {
   constructor(
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-    @InjectModel(BlockedUser.name) private blockedUserModel: Model<BlockedUserDocument>,
+    @InjectModel(BlockedUser.name)
+    private blockedUserModel: Model<BlockedUserDocument>,
   ) {}
 
-  async searchPosts(q?: string, occasion?: string, style?: string, tags?: string): Promise<any[]> {
+  async searchPosts(
+    q?: string,
+    occasion?: string,
+    style?: string,
+    tags?: string,
+  ): Promise<any[]> {
     const query: any = { status: 'published' };
 
     if (q) {
@@ -43,7 +52,11 @@ export class SearchService {
     return posts;
   }
 
-  async searchUsers(q?: string, style?: string, currentUserId?: string): Promise<any[]> {
+  async searchUsers(
+    q?: string,
+    style?: string,
+    currentUserId?: string,
+  ): Promise<any[]> {
     const searchQuery: any = {};
 
     if (q) {

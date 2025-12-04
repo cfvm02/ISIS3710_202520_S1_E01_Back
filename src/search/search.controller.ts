@@ -1,10 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { SearchService } from './search.service';
 import { Public } from '../common/decorators/public.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -49,7 +44,10 @@ export class SearchController {
   @Get('suggestions')
   @ApiOperation({ summary: 'Get search suggestions' })
   @ApiQuery({ name: 'q', required: true })
-  @ApiResponse({ status: 200, description: 'Suggestions retrieved successfully' })
+  @ApiResponse({
+    status: 200,
+    description: 'Suggestions retrieved successfully',
+  })
   getSuggestions(@Query('q') q: string) {
     return this.searchService.getSuggestions(q);
   }
