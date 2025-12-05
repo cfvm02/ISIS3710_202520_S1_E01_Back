@@ -15,6 +15,7 @@ async function bootstrap() {
       'http://localhost:3001',
       'http://localhost:3002',
       'http://localhost:3003',
+      'https://isis-3710-202520-s1-e01-front.vercel.app',
       /^http:\/\/localhost:\d+$/,
     ],
     credentials: true,
