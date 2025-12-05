@@ -19,6 +19,7 @@ import { CreatePostDto, UpdatePostDto } from './dto/create-post.dto';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
 import { PaginatedPostsResponseDto } from './dto/paginated-posts-response.dto';
 import { FileUrlService } from '../common/services/file-url.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PostsService {
@@ -31,6 +32,7 @@ export class PostsService {
     private collectionItemModel: Model<CollectionItemDocument>,
     @InjectModel(Rating.name) private ratingModel: Model<RatingDocument>,
     private readonly fileUrlService: FileUrlService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(userId: string, createPostDto: CreatePostDto): Promise<any> {
@@ -248,6 +250,18 @@ export class PostsService {
       { $inc: { likesCount: 1 } },
       { new: true },
     );
+
+    // Create notification for post owner (only if liker is different from post owner)
+    const postOwnerId = post.userId.toString();
+    if (postOwnerId !== userId) {
+      await this.notificationsService.createNotification(
+        postOwnerId,
+        userId,
+        'like',
+        'liked your post',
+        postId,
+      );
+    }
 
     return {
       liked: true,

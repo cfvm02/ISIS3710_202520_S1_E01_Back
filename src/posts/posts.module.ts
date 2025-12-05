@@ -12,6 +12,7 @@ import {
 } from '../schemas/collection-item.schema';
 import { Rating, RatingSchema } from '../schemas/rating.schema';
 import { FileUrlService } from '../common/services/file-url.service';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { FileUrlService } from '../common/services/file-url.service';
       { name: CollectionItem.name, schema: CollectionItemSchema },
       { name: Rating.name, schema: RatingSchema },
     ]),
+    NotificationsModule,
   ],
   controllers: [PostsController],
   providers: [PostsService, FileUrlService],

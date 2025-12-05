@@ -128,11 +128,14 @@ export class NotificationsService {
     commentId?: string,
     ratingId?: string,
   ): Promise<void> {
+    console.log('🔔 [DEBUG] createNotification called:', { recipientId, senderId, type });
+
     if (recipientId === senderId) {
+      console.log('🔔 [DEBUG] Skipping notification - same user');
       return;
     }
 
-    await this.notificationModel.create({
+    const notification = await this.notificationModel.create({
       recipientId: new Types.ObjectId(recipientId),
       senderId: new Types.ObjectId(senderId),
       type,
@@ -141,5 +144,7 @@ export class NotificationsService {
       commentId: commentId ? new Types.ObjectId(commentId) : null,
       ratingId: ratingId ? new Types.ObjectId(ratingId) : null,
     });
+
+    console.log('🔔 [DEBUG] Notification created:', notification._id);
   }
 }

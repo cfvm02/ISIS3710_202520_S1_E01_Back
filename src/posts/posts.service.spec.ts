@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { FileUrlService } from '../common/services/file-url.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import type { CreatePostDto } from './dto/create-post.dto';
 
 // IDs válidos reutilizables
@@ -60,6 +61,11 @@ const fileUrlServiceMock = {
   ),
 };
 
+// Mock NotificationsService
+const notificationsServiceMock = {
+  createNotification: jest.fn().mockResolvedValue(undefined),
+};
+
 // Helper para consultas encadenables de Mongoose (.sort().skip().limit().populate().lean())
 function mockFindQuery(resolvedValue: any) {
   return {
@@ -88,6 +94,7 @@ describe('PostsService FULL TESTS', () => {
         },
         { provide: getModelToken('Rating'), useValue: ratingModelMock },
         { provide: FileUrlService, useValue: fileUrlServiceMock },
+        { provide: NotificationsService, useValue: notificationsServiceMock },
       ],
     }).compile();
 
@@ -329,6 +336,7 @@ describe('PostsService FULL TESTS', () => {
   it('should like a post successfully', async () => {
     postModelMock.findById.mockResolvedValue({
       _id: new Types.ObjectId(POST_ID),
+      userId: new Types.ObjectId(OTHER_USER_ID),
     });
 
     postLikeModelMock.findOne.mockResolvedValue(null);
@@ -342,6 +350,13 @@ describe('PostsService FULL TESTS', () => {
 
     expect(result.liked).toBe(true);
     expect(result.likesCount).toBe(3);
+    expect(notificationsServiceMock.createNotification).toHaveBeenCalledWith(
+      OTHER_USER_ID,
+      USER_ID,
+      'like',
+      'liked your post',
+      POST_ID,
+    );
   });
 
   // Test para error al dar like a post inexistente
@@ -357,6 +372,7 @@ describe('PostsService FULL TESTS', () => {
   it('should throw BadRequestException when liking already liked post', async () => {
     postModelMock.findById.mockResolvedValue({
       _id: new Types.ObjectId(POST_ID),
+      userId: new Types.ObjectId(OTHER_USER_ID),
     });
 
     postLikeModelMock.findOne.mockResolvedValue({ _id: 'like' });
@@ -364,6 +380,25 @@ describe('PostsService FULL TESTS', () => {
     await expect(service.likePost(POST_ID, USER_ID)).rejects.toThrow(
       BadRequestException,
     );
+  });
+
+  // Test para verificar que NO se crea notificación cuando el usuario da like a su propio post
+  it('should not create notification when user likes their own post', async () => {
+    postModelMock.findById.mockResolvedValue({
+      _id: new Types.ObjectId(POST_ID),
+      userId: new Types.ObjectId(USER_ID), // Same user
+    });
+
+    postLikeModelMock.findOne.mockResolvedValue(null);
+    postLikeModelMock.create.mockResolvedValue({});
+
+    postModelMock.findByIdAndUpdate.mockResolvedValue({
+      likesCount: 1,
+    });
+
+    await service.likePost(POST_ID, USER_ID);
+
+    expect(notificationsServiceMock.createNotification).not.toHaveBeenCalled();
   });
 
   // Test para quitar like de un post

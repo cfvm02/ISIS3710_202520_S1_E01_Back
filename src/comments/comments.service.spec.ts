@@ -7,6 +7,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { Types } from 'mongoose';
+import { NotificationsService } from '../notifications/notifications.service';
 
 // IDs válidos
 const VALID_ID = '507f1f77bcf86cd799439011';
@@ -37,6 +38,11 @@ const postModelMock = {
   findByIdAndUpdate: jest.fn(),
 };
 
+// Mock NotificationsService
+const notificationsServiceMock = {
+  createNotification: jest.fn().mockResolvedValue(undefined),
+};
+
 // Silenciar logs
 jest.spyOn(global.console, 'log').mockImplementation(() => {});
 
@@ -49,6 +55,7 @@ describe('CommentsService FULL TESTS', () => {
         CommentsService,
         { provide: getModelToken('Comment'), useValue: commentModelMock },
         { provide: getModelToken('Post'), useValue: postModelMock },
+        { provide: NotificationsService, useValue: notificationsServiceMock },
       ],
     }).compile();
 
@@ -60,7 +67,10 @@ describe('CommentsService FULL TESTS', () => {
   it('should create a comment successfully', async () => {
     const dto = { text: 'Hello world' };
 
-    postModelMock.findById.mockResolvedValue({ _id: VALID_ID });
+    postModelMock.findById.mockResolvedValue({
+      _id: VALID_ID,
+      userId: OTHER_ID,
+    });
 
     commentModelMock.findById.mockReturnValue(
       mockQuery({ _id: VALID_ID, content: 'Hello world' }),
@@ -76,6 +86,14 @@ describe('CommentsService FULL TESTS', () => {
 
     expect(result._id).toBe(VALID_ID);
     expect(result.content).toBe('Hello world');
+    expect(notificationsServiceMock.createNotification).toHaveBeenCalledWith(
+      OTHER_ID,
+      VALID_ID,
+      'comment',
+      'commented on your post',
+      VALID_ID,
+      VALID_ID,
+    );
   });
 
   // Test para error cuando el post no existe
@@ -85,6 +103,27 @@ describe('CommentsService FULL TESTS', () => {
     await expect(
       service.create(VALID_ID, VALID_ID, { text: 'x' }),
     ).rejects.toThrow(NotFoundException);
+  });
+
+  // Test para verificar que NO se crea notificación cuando el usuario comenta en su propio post
+  it('should not create notification when user comments on their own post', async () => {
+    const dto = { text: 'My comment' };
+
+    postModelMock.findById.mockResolvedValue({
+      _id: VALID_ID,
+      userId: VALID_ID, // Same user
+    });
+
+    commentModelMock.findById.mockReturnValue(
+      mockQuery({ _id: VALID_ID, content: 'My comment' }),
+    );
+
+    commentModelMock.create.mockResolvedValue({ _id: VALID_ID });
+    postModelMock.findByIdAndUpdate.mockResolvedValue({});
+
+    await service.create(VALID_ID, VALID_ID, dto);
+
+    expect(notificationsServiceMock.createNotification).not.toHaveBeenCalled();
   });
 
   // Test para error cuando el comentario padre no existe

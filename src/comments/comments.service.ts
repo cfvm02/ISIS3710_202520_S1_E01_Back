@@ -10,12 +10,14 @@ import { Comment, CommentDocument } from '../schemas/comment.schema';
 import { Post, PostDocument } from '../schemas/post.schema';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { PaginatedResponseDto } from '../common/dto/pagination.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class CommentsService {
   constructor(
     @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
     @InjectModel(Post.name) private postModel: Model<PostDocument>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(
@@ -56,6 +58,19 @@ export class CommentsService {
     await this.postModel.findByIdAndUpdate(postId, {
       $inc: { commentsCount: 1 },
     });
+
+    // Create notification for post owner (only if commenter is different from post owner)
+    const postOwnerId = post.userId.toString();
+    if (postOwnerId !== userId) {
+      await this.notificationsService.createNotification(
+        postOwnerId,
+        userId,
+        'comment',
+        'commented on your post',
+        postId,
+        comment._id.toString(),
+      );
+    }
 
     return this.commentModel
       .findById(comment._id)
